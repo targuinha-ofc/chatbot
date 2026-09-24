@@ -4,10 +4,12 @@ const path = require('path');
 const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
+const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
 const apiKey = process.env.GEMINI_API_KEY;
 const mongoUri = process.env.MONGO_URI;
+const jwtSecret = process.env.JWT_SECRET;
 const porta = process.env.PORT || 3000;
 
 if (!apiKey) {
@@ -17,6 +19,11 @@ if (!apiKey) {
 
 if (!mongoUri) {
     console.error('ERRO: MONGO_URI não encontrada.');
+    process.exit(1);
+}
+
+if (!jwtSecret) {
+    console.error('ERRO: JWT_SECRET não encontrada.');
     process.exit(1);
 }
 
@@ -30,6 +37,7 @@ app.get('/api/status', (req, res) => {
     res.status(200).json({ status: 'Servidor da IA Operacional' });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 
 mongoose.connect(mongoUri)

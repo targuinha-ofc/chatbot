@@ -10,7 +10,7 @@ Agente de IA com memória persistente usando Node.js, Express, Gemini e MongoDB 
    npm install
    ```
 
-2. Copie `.env.example` para `.env` e preencha `GEMINI_API_KEY`, `MONGO_URI` e `WEATHER_API_KEY`.
+2. Copie `.env.example` para `.env` e preencha `GEMINI_API_KEY`, `MONGO_URI`, `WEATHER_API_KEY` e `JWT_SECRET`.
 
 3. Inicie o servidor:
 
@@ -25,6 +25,12 @@ Abra `http://localhost:3000` no navegador.
 - `GET /api/status`: verifica se o servidor está operacional.
 - `POST /api/chat`: recebe `{ "pergunta": "..." }` e retorna uma resposta com contexto.
 - `DELETE /api/chat/limpar`: apaga todo o histórico salvo no MongoDB.
+
+### Autenticação
+
+- `POST /api/auth/register`: cria um usuário e armazena a senha com bcrypt.
+- `POST /api/auth/login`: valida as credenciais e retorna um JWT válido por 7 dias.
+- `POST /api/chat` e `DELETE /api/chat/limpar`: exigem `Authorization: Bearer <TOKEN>`.
 
 O frontend renderiza as respostas Markdown com `marked.js` e sanitiza o HTML antes de exibi-lo.
 

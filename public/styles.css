@@ -17,6 +17,21 @@ body { min-height: 100vh; margin: 0; color: var(--ink); background: linear-gradi
 h1, h2 { font-family: "Space Grotesk", sans-serif; }
 h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: 0.95; letter-spacing: -0.04em; }
 button { font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+.auth-screen { display: grid; min-height: 100vh; place-items: center; padding: 1.5rem; }
+.auth-card { width: min(440px, 100%); padding: clamp(1.5rem, 5vw, 3rem); border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.88); box-shadow: 0 24px 70px rgba(35, 74, 65, 0.1); }
+.auth-card h1 { margin: 0; font-size: clamp(2.2rem, 8vw, 3.5rem); }
+.auth-copy { margin: 1rem 0 1.8rem; color: var(--muted); line-height: 1.6; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+.auth-tab { border: 0; border-bottom: 2px solid transparent; padding: 0.7rem; color: var(--muted); background: transparent; font-weight: 700; }
+.auth-tab.active { border-color: var(--accent); color: var(--ink); }
+.auth-card form { display: grid; gap: 0.55rem; }
+.auth-card label { margin-top: 0.55rem; font-size: 0.8rem; font-weight: 700; }
+.auth-card input { width: 100%; border: 1px solid var(--line); border-radius: 4px; padding: 0.85rem; color: var(--ink); background: #fbfdfb; font: inherit; }
+.auth-card input:focus { border-color: var(--accent); outline: 2px solid rgba(230, 110, 60, 0.16); }
+.auth-submit { margin-top: 1rem; border: 0; border-radius: 5px; padding: 0.9rem; color: white; background: var(--accent); font-weight: 700; }
+.auth-submit:hover { background: var(--accent-dark); }
+.auth-status { margin: 1rem 0 0; color: var(--danger); font-size: 0.85rem; }
 .clear-button { border: 1px solid #efc5bc; border-radius: 5px; padding: 0.7rem 0.9rem; color: var(--danger); background: #fff8f6; font-size: 0.82rem; font-weight: 700; }
 .clear-button:hover { border-color: var(--danger); background: #fff0ed; }
 .chat-panel { overflow: hidden; border: 1px solid rgba(220, 232, 226, 0.95); border-radius: 8px; background: rgba(255, 255, 255, 0.85); box-shadow: 0 24px 70px rgba(35, 74, 65, 0.1); backdrop-filter: blur(12px); }
@@ -43,6 +58,10 @@ button { font: inherit; cursor: pointer; }
 .status-line { margin: 0; padding: 0 1rem 1rem; color: var(--muted); font-size: 0.74rem; }
 .status-error { color: var(--danger); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+button { font: inherit; cursor: pointer; }
+.topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+.logout-button { border: 1px solid var(--line); border-radius: 5px; padding: 0.7rem 0.9rem; color: var(--muted); background: transparent; font-size: 0.82rem; font-weight: 700; }
+.logout-button:hover { border-color: var(--ink); color: var(--ink); }
 @media (max-width: 600px) {
     .topbar { align-items: start; }
     .clear-button { font-size: 0.74rem; }

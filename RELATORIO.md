@@ -18,6 +18,8 @@ Também foram adicionados o envio de mensagens com `Enter`, o botão de limpeza 
 
 Nesta evolução, o agente também ganhou Function Calling: ele pode consultar o clima atual de uma cidade por meio da OpenWeatherMap quando a intenção da pergunta exigir dados em tempo real.
 
+Também foi adicionada autenticação JWT: cadastro, login, senha com bcrypt, middleware Bearer e memória isolada por usuário.
+
 ## 3. Arquitetura em Nuvem
 
 ```mermaid
@@ -41,6 +43,7 @@ flowchart LR
 - **DOMPurify:** sanitização do HTML gerado antes da exibição.
 - **OpenWeatherMap:** dados atuais de temperatura e condições climáticas acionados pelo agente.
 - **CORS e variáveis de ambiente:** integração entre clientes e proteção de credenciais.
+- **bcryptjs + JWT:** hash de senhas e autenticação stateless das rotas privadas.
 
 ### Organização do código
 

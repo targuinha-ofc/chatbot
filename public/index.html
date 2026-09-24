@@ -13,13 +13,38 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 </head>
 <body>
-    <main class="app-shell">
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+        <div class="auth-card">
+            <p class="eyebrow">Acesso protegido</p>
+            <h1 id="auth-title">Entre no Campo Aberto.</h1>
+            <p class="auth-copy">Crie seu acesso para conversar com memória privada e persistente.</p>
+            <div class="auth-tabs" role="tablist" aria-label="Autenticação">
+                <button class="auth-tab active" id="login-tab" type="button">Entrar</button>
+                <button class="auth-tab" id="register-tab" type="button">Criar conta</button>
+            </div>
+            <form id="auth-form">
+                <label id="name-label" for="auth-name" hidden>Nome</label>
+                <input id="auth-name" type="text" placeholder="Seu nome" autocomplete="name" hidden>
+                <label for="auth-email">E-mail</label>
+                <input id="auth-email" type="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+                <label for="auth-password">Senha</label>
+                <input id="auth-password" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password" required>
+                <button class="auth-submit" type="submit" id="auth-submit">Entrar</button>
+            </form>
+            <p class="auth-status" id="auth-status" role="alert" hidden></p>
+        </div>
+    </section>
+
+    <main class="app-shell" id="chat-app" hidden>
         <header class="topbar">
             <div>
                 <p class="eyebrow">Agente com memória</p>
                 <h1>Campo Aberto</h1>
             </div>
-            <button class="clear-button" id="clear-button" type="button">Limpar conversa</button>
+            <div class="topbar-actions">
+                <button class="clear-button" id="clear-button" type="button">Limpar conversa</button>
+                <button class="logout-button" id="logout-button" type="button">Sair</button>
+            </div>
         </header>
         <section class="chat-panel" aria-label="Conversa com o agente">
             <div class="conversation" id="conversation" aria-live="polite">

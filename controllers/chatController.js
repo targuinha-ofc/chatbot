@@ -33,9 +33,10 @@ async function conversar(req, res) {
 
     try {
         const textoPergunta = pergunta.trim();
+        const usuarioId = req.usuario.id;
         console.log(`Nova pergunta recebida: "${textoPergunta}"`);
 
-        const historicoSalvo = await Mensagem.find()
+        const historicoSalvo = await Mensagem.find({ usuarioId })
             .select('role parts -_id')
             .sort({ dataHora: -1 })
             .limit(20)
@@ -50,8 +51,8 @@ async function conversar(req, res) {
         const resposta = resultado.response.text();
 
         await Mensagem.create([
-            { role: 'user', parts: [{ text: textoPergunta }] },
-            { role: 'model', parts: [{ text: resposta }] }
+            { usuarioId, role: 'user', parts: [{ text: textoPergunta }] },
+            { usuarioId, role: 'model', parts: [{ text: resposta }] }
         ]);
 
         return res.status(200).json({ sucesso: true, resposta });
@@ -99,7 +100,7 @@ function normalizarHistorico(mensagens) {
 
 async function limparMemoria(req, res) {
     try {
-        const resultado = await Mensagem.deleteMany({});
+        const resultado = await Mensagem.deleteMany({ usuarioId: req.usuario.id });
         return res.status(200).json({
             sucesso: true,
             apagadas: resultado.deletedCount,
