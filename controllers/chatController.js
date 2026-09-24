@@ -7,6 +7,20 @@ const modelosDisponiveis = [
     'gemini-3.7-flash',
     'gemini-flash-latest'
 ];
+const declaracaoClima = {
+    name: 'buscarClimaTempoReal',
+    description: 'Obtém a temperatura e a descrição do clima atual de uma cidade. Use quando a pergunta envolver tempo, temperatura ou chuva.',
+    parameters: {
+        type: 'OBJECT',
+        properties: {
+            cidade: {
+                type: 'STRING',
+                description: 'Nome da cidade para consultar. Exemplo: Londres ou Curitiba.'
+            }
+        },
+        required: ['cidade']
+    }
+};
 
 async function conversar(req, res) {
     const { pergunta } = req.body || {};
@@ -26,10 +40,7 @@ async function conversar(req, res) {
             .sort({ dataHora: -1 })
             .limit(20)
             .lean();
-        const historico = historicoSalvo.reverse().map((mensagem) => ({
-            role: mensagem.role,
-            parts: mensagem.parts.map((parte) => ({ text: parte.text }))
-        }));
+        const historico = normalizarHistorico(historicoSalvo.reverse());
         const prompt = [
             'Você é um narrador de futebol empolgado e bem-humorado.',
             'Responda em português do Brasil de forma clara e útil.',
@@ -63,6 +74,29 @@ async function conversar(req, res) {
     }
 }
 
+function normalizarHistorico(mensagens) {
+    const historico = [];
+
+    for (const mensagem of mensagens) {
+        const partes = mensagem.parts
+            .filter((parte) => typeof parte.text === 'string' && parte.text.trim())
+            .map((parte) => ({ text: parte.text }));
+
+        if (!partes.length) continue;
+        if (!historico.length && mensagem.role !== 'user') continue;
+
+        const ultimaMensagem = historico[historico.length - 1];
+
+        if (ultimaMensagem && ultimaMensagem.role === mensagem.role) {
+            ultimaMensagem.parts.push(...partes);
+        } else {
+            historico.push({ role: mensagem.role, parts: partes });
+        }
+    }
+
+    return historico;
+}
+
 async function limparMemoria(req, res) {
     try {
         const resultado = await Mensagem.deleteMany({});
@@ -79,11 +113,13 @@ async function limparMemoria(req, res) {
 
 async function gerarComFallback(prompt, historico) {
     for (let indice = 0; indice < modelosDisponiveis.length; indice += 1) {
-        const model = genAI.getGenerativeModel({ model: modelosDisponiveis[indice] });
+        const model = genAI.getGenerativeModel({
+            model: modelosDisponiveis[indice],
+            tools: [{ functionDeclarations: [declaracaoClima] }]
+        });
 
         try {
-            const chat = model.startChat({ history: historico });
-            return await gerarComRetry(() => chat.sendMessage(prompt));
+            return await executarConversa(model, prompt, historico);
         } catch (erro) {
             const modeloIndisponivel = erro.message.includes('[429') || erro.message.includes('[503');
             const ultimoModelo = indice === modelosDisponiveis.length - 1;
@@ -95,6 +131,78 @@ async function gerarComFallback(prompt, historico) {
             console.log(`Modelo indisponível. Tentando ${modelosDisponiveis[indice + 1]}...`);
         }
     }
+}
+
+async function executarConversa(model, prompt, historico) {
+    const chat = model.startChat({ history: historico });
+    let resultado = await gerarComRetry(() => chat.sendMessage(prompt));
+
+    for (let rodada = 0; rodada < 3; rodada += 1) {
+        const chamadas = resultado.response.functionCalls?.() || [];
+
+        if (!chamadas.length) {
+            return resultado;
+        }
+
+        const respostas = await Promise.all(chamadas.map(async (chamada) => ({
+            functionResponse: {
+                name: chamada.name,
+                response: await executarFerramenta(chamada.name, chamada.args || {})
+            }
+        })));
+
+        resultado = await gerarComRetry(() => chat.sendMessage(respostas));
+    }
+
+    throw new Error('O agente excedeu o limite de chamadas de ferramentas.');
+}
+
+async function executarFerramenta(nome, argumentos) {
+    if (nome === 'buscarClimaTempoReal') {
+        return buscarClimaTempoReal(argumentos.cidade);
+    }
+
+    return { erro: `Ferramenta desconhecida: ${nome}` };
+}
+
+async function buscarClimaTempoReal(cidade) {
+    const chaveClima = process.env.WEATHER_API_KEY;
+
+    if (!chaveClima) {
+        return { erro: 'A ferramenta de clima está sem WEATHER_API_KEY configurada.' };
+    }
+
+    if (typeof cidade !== 'string' || !cidade.trim()) {
+        return { erro: 'A cidade não foi informada.' };
+    }
+
+    const parametros = new URLSearchParams({
+        q: cidade.trim(),
+        appid: chaveClima,
+        units: 'metric',
+        lang: 'pt_br'
+    });
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?${parametros}`);
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            return { erro: `Cidade não encontrada: ${cidade.trim()}.` };
+        }
+
+        return { erro: `A API de clima respondeu com status ${response.status}.` };
+    }
+
+    const dados = await response.json();
+
+    return {
+        cidade: dados.name,
+        pais: dados.sys?.country,
+        temperatura_celsius: dados.main?.temp,
+        sensacao_termica_celsius: dados.main?.feels_like,
+        descricao: dados.weather?.[0]?.description,
+        umidade_percentual: dados.main?.humidity,
+        vento_metros_por_segundo: dados.wind?.speed
+    };
 }
 
 async function gerarComRetry(operacao) {
