@@ -64,6 +64,12 @@ button { font: inherit; cursor: pointer; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 button { font: inherit; cursor: pointer; }
 .topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+.health-indicator { display: flex; gap: 0.45rem; align-items: center; color: var(--muted); font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.health-dot { width: 8px; height: 8px; border-radius: 50%; background: #a7b5b0; }
+.health-indicator.is-online .health-dot { background: #3c9a68; box-shadow: 0 0 0 4px #d9f0e2; }
+.health-indicator.is-online { color: #28734f; }
+.health-indicator.is-offline .health-dot { background: var(--danger); box-shadow: 0 0 0 4px #f8ded9; }
+.health-indicator.is-offline { color: var(--danger); }
 .logout-button { border: 1px solid var(--line); border-radius: 5px; padding: 0.7rem 0.9rem; color: var(--muted); background: transparent; font-size: 0.82rem; font-weight: 700; }
 .logout-button:hover { border-color: var(--ink); color: var(--ink); }
 @media (max-width: 600px) {

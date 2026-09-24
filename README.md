@@ -23,6 +23,7 @@ Abra `http://localhost:3000` no navegador.
 ## Endpoints
 
 - `GET /api/status`: verifica se o servidor está operacional.
+- `GET /api/health`: health check público para Render, balanceadores e UptimeRobot.
 - `POST /api/chat`: recebe `{ "pergunta": "..." }` e retorna uma resposta com contexto.
 - `GET /api/chat/historico`: retorna o histórico autenticado, incluindo URLs das imagens.
 - `POST /api/chat/vision`: recebe `multipart/form-data` com `imagem` e `prompt`.

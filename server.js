@@ -37,6 +37,14 @@ app.get('/api/status', (req, res) => {
     res.status(200).json({ status: 'Servidor da IA Operacional' });
 });
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        servico: 'campo-aberto',
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 

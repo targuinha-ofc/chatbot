@@ -19,7 +19,11 @@ const clearButton = document.getElementById('clear-button');
 const statusLine = document.getElementById('status-line');
 const imageInput = document.getElementById('image-upload');
 const attachmentName = document.getElementById('attachment-name');
+const healthIndicator = document.getElementById('health-indicator');
+const healthLabel = document.getElementById('health-label');
 let modoCadastro = false;
+
+verificarSaude();
 
 authForm.addEventListener('submit', autenticar);
 loginTab.addEventListener('click', () => definirModoCadastro(false));
@@ -228,4 +232,18 @@ function escapeHtml(text) {
     const element = document.createElement('div');
     element.textContent = text;
     return element.innerHTML;
+}
+
+async function verificarSaude() {
+    try {
+        const response = await fetch('/api/health');
+        if (!response.ok) throw new Error('API offline');
+        healthIndicator.className = 'health-indicator is-online';
+        healthIndicator.title = 'API operacional';
+        healthLabel.textContent = 'Sistema operacional';
+    } catch (erro) {
+        healthIndicator.className = 'health-indicator is-offline';
+        healthIndicator.title = 'API offline';
+        healthLabel.textContent = 'API offline';
+    }
 }
