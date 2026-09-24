@@ -1,7 +1,13 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { v2: cloudinary } = require('cloudinary');
 const Mensagem = require('../models/Mensagem');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 const modelosDisponiveis = [
     'gemini-3.8-flash',
     'gemini-3.7-flash',
@@ -110,6 +116,75 @@ async function limparMemoria(req, res) {
         console.error('Erro ao limpar memória:', erro.message);
         return res.status(500).json({ erro: 'Não foi possível apagar a memória.' });
     }
+}
+
+async function listarHistorico(req, res) {
+    try {
+        const mensagens = await Mensagem.find({ usuarioId: req.usuario.id })
+            .select('role parts imagemUrl dataHora -_id')
+            .sort({ dataHora: 1 })
+            .lean();
+
+        return res.status(200).json({ mensagens });
+    } catch (erro) {
+        console.error('Erro ao carregar histórico:', erro.message);
+        return res.status(500).json({ erro: 'Não foi possível carregar o histórico.' });
+    }
+}
+
+async function analisarImagem(req, res) {
+    if (!req.file) {
+        return res.status(400).json({ erro: 'Envie uma imagem no campo "imagem".' });
+    }
+
+    const prompt = typeof req.body.prompt === 'string' && req.body.prompt.trim()
+        ? req.body.prompt.trim()
+        : 'Descreva detalhadamente o que aparece nesta imagem.';
+
+    try {
+        const urlImagem = await enviarParaCloudinary(req.file.buffer);
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash-lite' });
+        const resultado = await gerarComRetry(() => model.generateContent([
+            { text: prompt },
+            {
+                inlineData: {
+                    data: req.file.buffer.toString('base64'),
+                    mimeType: req.file.mimetype
+                }
+            }
+        ]));
+        const resposta = resultado.response.text();
+        const usuarioId = req.usuario.id;
+
+        await Mensagem.create([
+            { usuarioId, role: 'user', parts: [{ text: prompt }], imagemUrl: urlImagem },
+            { usuarioId, role: 'model', parts: [{ text: resposta }] }
+        ]);
+
+        return res.status(200).json({ sucesso: true, resposta, imagemUrl: urlImagem });
+    } catch (erro) {
+        console.error('Erro na análise de imagem:', erro.message);
+
+        if (erro.message.includes('[429')) {
+            return res.status(429).json({ erro: 'Limite da API Gemini atingido. Tente novamente mais tarde.' });
+        }
+
+        return res.status(500).json({ erro: 'Não foi possível analisar a imagem.' });
+    }
+}
+
+function enviarParaCloudinary(buffer) {
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        return Promise.reject(new Error('Credenciais do Cloudinary não configuradas.'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const upload = cloudinary.uploader.upload_stream(
+            { folder: 'campo-aberto' },
+            (erro, resultado) => erro ? reject(erro) : resolve(resultado.secure_url)
+        );
+        upload.end(buffer);
+    });
 }
 
 async function gerarComFallback(prompt, historico) {
@@ -225,4 +300,4 @@ async function gerarComRetry(operacao) {
     }
 }
 
-module.exports = { conversar, limparMemoria };
+module.exports = { conversar, limparMemoria, listarHistorico, analisarImagem };

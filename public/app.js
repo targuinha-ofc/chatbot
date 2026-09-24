@@ -17,6 +17,8 @@ const conversation = document.getElementById('conversation');
 const sendButton = document.getElementById('send-button');
 const clearButton = document.getElementById('clear-button');
 const statusLine = document.getElementById('status-line');
+const imageInput = document.getElementById('image-upload');
+const attachmentName = document.getElementById('attachment-name');
 let modoCadastro = false;
 
 authForm.addEventListener('submit', autenticar);
@@ -25,6 +27,11 @@ registerTab.addEventListener('click', () => definirModoCadastro(true));
 logoutButton.addEventListener('click', sair);
 form.addEventListener('submit', enviarPergunta);
 clearButton.addEventListener('click', limparConversa);
+imageInput.addEventListener('change', () => {
+    const arquivo = imageInput.files[0];
+    attachmentName.textContent = arquivo ? `Imagem anexada: ${arquivo.name}` : '';
+    attachmentName.hidden = !arquivo;
+});
 questionInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -81,6 +88,7 @@ async function autenticar(event) {
 function mostrarChat() {
     authScreen.hidden = true;
     chatApp.hidden = false;
+    carregarHistorico();
 }
 
 function sair() {
@@ -93,25 +101,36 @@ function sair() {
 async function enviarPergunta(event) {
     event.preventDefault();
     const pergunta = questionInput.value.trim();
+    const arquivo = imageInput.files[0];
 
-    if (!pergunta) return;
+    if (!pergunta && !arquivo) return;
 
-    adicionarMensagem('user', pergunta);
+    const texto = pergunta || 'Analise esta imagem.';
+    if (!arquivo) adicionarMensagem('user', texto);
     questionInput.value = '';
     setLoading(true);
 
     try {
-        const response = await fetch('/api/chat', {
+        const body = arquivo ? new FormData() : JSON.stringify({ pergunta: texto });
+        if (arquivo) {
+            body.append('prompt', texto);
+            body.append('imagem', arquivo);
+        }
+        const response = await fetch(arquivo ? '/api/chat/vision' : '/api/chat', {
             method: 'POST',
-            headers: headersAutenticados(),
-            body: JSON.stringify({ pergunta })
+            headers: headersAutenticados(!arquivo),
+            body
         });
         const dados = await response.json();
 
         if (response.status === 401) return sair();
         if (!response.ok) throw new Error(dados.erro || 'Não foi possível enviar a pergunta.');
 
+        if (arquivo) adicionarMensagem('user', texto, dados.imagemUrl);
         adicionarMensagem('bot', dados.resposta);
+        imageInput.value = '';
+        attachmentName.textContent = '';
+        attachmentName.hidden = true;
         setStatus('Memória privada sincronizada');
     } catch (erro) {
         adicionarMensagem('bot', `**Erro:** ${erro.message}`);
@@ -135,6 +154,9 @@ async function limparConversa() {
         if (!response.ok) throw new Error(dados.erro || 'Não foi possível limpar a conversa.');
 
         conversation.innerHTML = '<div class="welcome-message"><span class="welcome-mark" aria-hidden="true">+</span><h2>Campo limpo.</h2><p>Uma nova conversa pode começar agora.</p></div>';
+        imageInput.value = '';
+        attachmentName.textContent = '';
+        attachmentName.hidden = true;
         setStatus('Memória apagada com sucesso.');
     } catch (erro) {
         setStatus(erro.message, true);
@@ -143,18 +165,46 @@ async function limparConversa() {
     }
 }
 
-function headersAutenticados() {
-    return {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem(tokenKey)}`
-    };
+function headersAutenticados(comJson = true) {
+    const headers = { Authorization: `Bearer ${localStorage.getItem(tokenKey)}` };
+    if (comJson) headers['Content-Type'] = 'application/json';
+    return headers;
 }
 
-function adicionarMensagem(tipo, texto) {
+async function carregarHistorico() {
+    try {
+        const response = await fetch('/api/chat/historico', { headers: headersAutenticados(false) });
+        const dados = await response.json();
+
+        if (response.status === 401) return sair();
+        if (!response.ok) throw new Error(dados.erro || 'Não foi possível carregar o histórico.');
+        if (!dados.mensagens.length) return;
+
+        conversation.innerHTML = '';
+        dados.mensagens.forEach((mensagem) => {
+            const texto = (mensagem.parts || []).map((parte) => parte.text).join('\n');
+            adicionarMensagem(mensagem.role === 'model' ? 'bot' : 'user', texto, mensagem.imagemUrl);
+        });
+    } catch (erro) {
+        setStatus(erro.message, true);
+    }
+}
+
+function adicionarMensagem(tipo, texto, imagemUrl = '') {
     const mensagem = document.createElement('div');
     mensagem.className = `message message-${tipo}`;
     const html = tipo === 'bot' ? marked.parse(texto) : escapeHtml(texto);
-    mensagem.innerHTML = tipo === 'bot' ? DOMPurify.sanitize(html) : html;
+    if (imagemUrl) {
+        const imagem = document.createElement('img');
+        imagem.className = 'message-image';
+        imagem.src = imagemUrl;
+        imagem.alt = 'Imagem enviada para análise';
+        imagem.loading = 'lazy';
+        mensagem.appendChild(imagem);
+    }
+    const textoMensagem = document.createElement('div');
+    textoMensagem.innerHTML = tipo === 'bot' ? DOMPurify.sanitize(html) : html;
+    mensagem.appendChild(textoMensagem);
     conversation.appendChild(mensagem);
     conversation.scrollTop = conversation.scrollHeight;
 }

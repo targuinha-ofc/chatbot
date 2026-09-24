@@ -56,9 +56,12 @@
             </div>
             <form class="composer" id="chat-form">
                 <label class="sr-only" for="question">Sua pergunta</label>
+                <label class="file-picker" for="image-upload" title="Anexar imagem">Imagem</label>
+                <input id="image-upload" type="file" accept="image/*" hidden>
                 <textarea id="question" name="question" rows="1" placeholder="Escreva sua pergunta..." required></textarea>
                 <button type="submit" id="send-button" aria-label="Enviar pergunta">Enviar <span aria-hidden="true">&#8599;</span></button>
             </form>
+            <p class="attachment-name" id="attachment-name" hidden></p>
             <p class="status-line" id="status-line">Memória sincronizada com o MongoDB Atlas</p>
         </section>
     </main>

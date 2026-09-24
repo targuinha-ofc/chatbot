@@ -41,6 +41,7 @@ button { font: inherit; cursor: pointer; }
 .welcome-message h2 { margin: 0 0 0.7rem; font-size: 1.5rem; }
 .welcome-message p { margin: 0; color: var(--muted); line-height: 1.6; }
 .message { max-width: 78%; padding: 0.9rem 1rem; border-radius: 6px; line-height: 1.6; }
+.message-image { display: block; width: min(100%, 300px); max-height: 240px; margin-bottom: 0.7rem; border-radius: 4px; object-fit: cover; }
 .message p:first-child { margin-top: 0; }
 .message p:last-child { margin-bottom: 0; }
 .message ul, .message ol { padding-left: 1.3rem; }
@@ -50,12 +51,15 @@ button { font: inherit; cursor: pointer; }
 .message-user { align-self: end; color: white; background: var(--ink); }
 .message-bot { align-self: start; border: 1px solid var(--line); background: #fbfdfb; }
 .composer { display: flex; gap: 0.7rem; align-items: end; border-top: 1px solid var(--line); padding: 1rem; }
+.file-picker { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 5px; padding: 0.85rem 0.7rem; color: var(--muted); background: #fbfdfb; cursor: pointer; font-size: 0.78rem; font-weight: 700; }
+.file-picker:hover { border-color: var(--accent); color: var(--accent-dark); }
 .composer textarea { width: 100%; resize: none; border: 1px solid transparent; outline: none; padding: 0.85rem 0.5rem; color: var(--ink); background: transparent; font: inherit; line-height: 1.4; }
 .composer textarea:focus { border-color: var(--line); border-radius: 4px; }
 .composer button { flex: 0 0 auto; border: 0; border-radius: 5px; padding: 0.85rem 1rem; color: white; background: var(--accent); font-weight: 700; }
 .composer button:hover { background: var(--accent-dark); }
 .composer button:disabled { cursor: wait; opacity: 0.6; }
 .status-line { margin: 0; padding: 0 1rem 1rem; color: var(--muted); font-size: 0.74rem; }
+.attachment-name { margin: 0; padding: 0 1rem 1rem; color: var(--accent-dark); font-size: 0.78rem; }
 .status-error { color: var(--danger); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 button { font: inherit; cursor: pointer; }
@@ -68,5 +72,6 @@ button { font: inherit; cursor: pointer; }
     .conversation { min-height: 55vh; }
     .message { max-width: 90%; }
     .composer { align-items: stretch; flex-direction: column; }
+    .file-picker { text-align: center; }
     .composer button { width: 100%; }
 }

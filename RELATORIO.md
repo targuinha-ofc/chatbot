@@ -20,6 +20,8 @@ Nesta evolução, o agente também ganhou Function Calling: ele pode consultar o
 
 Também foi adicionada autenticação JWT: cadastro, login, senha com bcrypt, middleware Bearer e memória isolada por usuário.
 
+Por fim, a sprint multimodal adicionou upload de imagens para o Cloudinary, análise visual pelo Gemini e histórico persistente das URLs de mídia.
+
 ## 3. Arquitetura em Nuvem
 
 ```mermaid
@@ -44,6 +46,7 @@ flowchart LR
 - **OpenWeatherMap:** dados atuais de temperatura e condições climáticas acionados pelo agente.
 - **CORS e variáveis de ambiente:** integração entre clientes e proteção de credenciais.
 - **bcryptjs + JWT:** hash de senhas e autenticação stateless das rotas privadas.
+- **Multer + Cloudinary + Gemini Vision:** upload persistente e análise multimodal de imagens.
 
 ### Organização do código
 
