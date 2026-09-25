@@ -2,23 +2,44 @@
 
 Agente de IA com memória persistente usando Node.js, Express, Gemini e MongoDB Atlas.
 
+## Estrutura
+
+- `frontend/`: interface estática (`index.html`, `app.js` e `styles.css`).
+- `backend/`: API Express, autenticação, chat, modelos e integração com MongoDB.
+
+## Deploy separado
+
+### Backend
+
+Configure a raiz do serviço como `backend/`, instale as dependências e use `npm start`. Defina as variáveis de ambiente listadas abaixo. O backend não serve mais os arquivos estáticos do frontend.
+
+### Frontend
+
+Configure a raiz do projeto como `frontend/` em um serviço de hospedagem estática. O endereço da API é definido no início de `frontend/app.js` pela constante `apiBaseUrl`.
+
 ## Configuração
 
-1. Instale as dependências:
+1. Entre na pasta do backend:
+
+   ```bash
+   cd backend
+   ```
+
+2. Instale as dependências:
 
    ```bash
    npm install
    ```
 
-2. Copie `.env.example` para `.env` e preencha `GEMINI_API_KEY`, `MONGO_URI`, `WEATHER_API_KEY`, `JWT_SECRET` e as três variáveis do Cloudinary.
+3. Copie `.env.example` para `.env` e preencha `GEMINI_API_KEY`, `MONGO_URI`, `WEATHER_API_KEY`, `JWT_SECRET` e as três variáveis do Cloudinary.
 
-3. Inicie o servidor:
+4. Inicie o servidor:
 
    ```bash
    npm start
    ```
 
-Abra `http://localhost:3000` no navegador.
+Abra o frontend separadamente no navegador. A API ficará disponível em `http://localhost:3000`.
 
 ## Endpoints
 
