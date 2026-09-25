@@ -1,4 +1,5 @@
 const tokenKey = 'token_saas';
+const apiBaseUrl = 'https://chatbot-1-i0i5.onrender.com';
 const authScreen = document.getElementById('auth-screen');
 const chatApp = document.getElementById('chat-app');
 const authForm = document.getElementById('auth-form');
@@ -70,7 +71,7 @@ async function autenticar(event) {
 
         if (modoCadastro) body.nome = authName.value.trim();
 
-        const response = await fetch(endpoint, {
+        const response = await fetch(`${apiBaseUrl}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -120,7 +121,7 @@ async function enviarPergunta(event) {
             body.append('prompt', texto);
             body.append('imagem', arquivo);
         }
-        const response = await fetch(arquivo ? '/api/chat/vision' : '/api/chat', {
+        const response = await fetch(`${apiBaseUrl}${arquivo ? '/api/chat/vision' : '/api/chat'}`, {
             method: 'POST',
             headers: headersAutenticados(!arquivo),
             body
@@ -148,7 +149,7 @@ async function limparConversa() {
     clearButton.disabled = true;
 
     try {
-        const response = await fetch('/api/chat/limpar', {
+        const response = await fetch(`${apiBaseUrl}/api/chat/limpar`, {
             method: 'DELETE',
             headers: headersAutenticados()
         });
@@ -177,7 +178,7 @@ function headersAutenticados(comJson = true) {
 
 async function carregarHistorico() {
     try {
-        const response = await fetch('/api/chat/historico', { headers: headersAutenticados(false) });
+        const response = await fetch(`${apiBaseUrl}/api/chat/historico`, { headers: headersAutenticados(false) });
         const dados = await response.json();
 
         if (response.status === 401) return sair();
@@ -236,7 +237,7 @@ function escapeHtml(text) {
 
 async function verificarSaude() {
     try {
-        const response = await fetch('/api/health');
+        const response = await fetch(`${apiBaseUrl}/api/health`);
         if (!response.ok) throw new Error('API offline');
         healthIndicator.className = 'health-indicator is-online';
         healthIndicator.title = 'API operacional';
