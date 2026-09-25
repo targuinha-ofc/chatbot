@@ -22,6 +22,7 @@ button { font: inherit; cursor: pointer; }
 .auth-card { width: min(440px, 100%); padding: clamp(1.5rem, 5vw, 3rem); border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.88); box-shadow: 0 24px 70px rgba(35, 74, 65, 0.1); }
 .auth-card h1 { margin: 0; font-size: clamp(2.2rem, 8vw, 3.5rem); }
 .auth-copy { margin: 1rem 0 1.8rem; color: var(--muted); line-height: 1.6; }
+.auth-health { margin: -0.7rem 0 1.4rem; }
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
 .auth-tab { border: 0; border-bottom: 2px solid transparent; padding: 0.7rem; color: var(--muted); background: transparent; font-weight: 700; }
 .auth-tab.active { border-color: var(--accent); color: var(--ink); }

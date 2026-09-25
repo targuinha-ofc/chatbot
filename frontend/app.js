@@ -22,6 +22,8 @@ const imageInput = document.getElementById('image-upload');
 const attachmentName = document.getElementById('attachment-name');
 const healthIndicator = document.getElementById('health-indicator');
 const healthLabel = document.getElementById('health-label');
+const authHealthIndicator = document.getElementById('auth-health-indicator');
+const authHealthLabel = document.getElementById('auth-health-label');
 let modoCadastro = false;
 
 verificarSaude();
@@ -239,12 +241,18 @@ async function verificarSaude() {
     try {
         const response = await fetch(`${apiBaseUrl}/api/health`);
         if (!response.ok) throw new Error('API offline');
-        healthIndicator.className = 'health-indicator is-online';
-        healthIndicator.title = 'API operacional';
-        healthLabel.textContent = 'Sistema operacional';
+        atualizarSaude('is-online', 'API operacional', 'Sistema operacional');
     } catch (erro) {
-        healthIndicator.className = 'health-indicator is-offline';
-        healthIndicator.title = 'API offline';
-        healthLabel.textContent = 'API offline';
+        atualizarSaude('is-offline', 'API offline', 'Sistema offline');
     }
+}
+
+function atualizarSaude(classe, titulo, mensagem) {
+    for (const indicador of [healthIndicator, authHealthIndicator]) {
+        indicador.className = `health-indicator ${classe}`;
+        indicador.title = titulo;
+    }
+
+    healthLabel.textContent = mensagem;
+    authHealthLabel.textContent = mensagem;
 }
